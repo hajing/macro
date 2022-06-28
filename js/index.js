@@ -16,7 +16,7 @@ $(document).ready(() => {
 
         // 初始化目标年份 2001、2004、2008、2014 数组
         for (let year = 1996; year <= 2020; year += 1) {
-            if (year === 2001 || year === 2004 || year === 2008 || year === 2014) {
+            if ([2001, 2004, 2008, 2014].includes(year)) {
                 targetYears.push(year);
             } else {
                 nonTargetYears.push(year);
