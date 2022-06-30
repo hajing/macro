@@ -252,5 +252,5 @@ $(document).ready(() => {
     };
 
     // 一切的开始
-    $("#macroContainer").load("../assets/svg/MacroDefault.svg", () => init());
+    $("#macroContainer").load("/assets/svg/MacroDefault.svg", () => init());
 });
