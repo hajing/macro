@@ -12,7 +12,7 @@ $(document).ready(() => {
             nonTarget: [],
         };
         const duration = 0.7;
-        const fillOpacity = 0.2;
+        const opacity = 0.2;
 
         // 初始化目标年份 2001、2004、2008、2014 数组
         for (let year = 1996; year <= 2020; year += 1) {
@@ -41,21 +41,9 @@ $(document).ready(() => {
         });
         console.log(handlerData)
 
-        // 设置其它分组透明度为 fillOpacity
+        // 设置其它分组透明度为 opacity
         const greyOther = (currentYear) => {
             // $("#Description").load("../assets/svg/03-For2001.svg");
-
-            gsap
-                .to("#Description", {
-                    duration,
-                    opacity: 0,
-                    display: "none",
-                })
-                .then(() => {
-                    // $("#Description").load("../assets/svg/03-For2001.svg");
-                });
-
-
 
             const {
                 target,
@@ -67,10 +55,10 @@ $(document).ready(() => {
                     target[year].forEach((ele) => {
                         const id = $(ele).attr("id");
                         // 粉红花瓣的特殊处理，分组合理的话此步骤可省略
-                        const fillOpacityValue = id.includes('Soil-Stocks-2') ? 0.9 : fillOpacity
+                        const opacityValue = id.includes('Soil-Stocks-2') ? 0.9 : opacity
                         gsap.to(ele, {
                             duration,
-                            fillOpacity: fillOpacityValue
+                            opacity: opacityValue
                         });
                     });
                 }
@@ -79,17 +67,17 @@ $(document).ready(() => {
             nonTarget.forEach((ele) => {
                 const id = $(ele).attr("id");
                 // 粉红花瓣的特殊处理，分组合理的话此步骤可省略
-                const fillOpacityValue = id.includes('Soil-Stocks-2') ? 0.9 : fillOpacity
+                const opacityValue = id.includes('Soil-Stocks-2') ? 0.9 : opacity
                 gsap.to(ele, {
                     duration,
-                    fillOpacity: fillOpacityValue
+                    opacity: opacityValue
                 });
             });
 
             // 特殊元素的处理
             gsap.to("#GaussianBlurring", {
                 duration,
-                fillOpacity: 0.9
+                opacity: 0.9
             });
 
             // 高亮当前叶片
@@ -107,16 +95,20 @@ $(document).ready(() => {
                 duration,
                 opacity: 1
             });
+
+            // 显示当前年份信息，隐藏默认描述
+            gsap.to("#default-text", {
+                duration,
+                opacity: 0,
+            })
+            gsap.to(`#_${currentYear}-text`, {
+                duration,
+                opacity: 1,
+            })
         };
 
         // 设置全部分组透明度为1
         const showAll = () => {
-            gsap.to("#Description", {
-                duration,
-                opacity: 1,
-                display: "block"
-            });
-
             const {
                 target,
                 nonTarget
@@ -126,7 +118,7 @@ $(document).ready(() => {
                 target[year].forEach((ele) => {
                     gsap.to(ele, {
                         duration,
-                        fillOpacity: 1
+                        opacity: 1
                     });
                 });
             });
@@ -134,58 +126,68 @@ $(document).ready(() => {
             nonTarget.forEach((ele) => {
                 gsap.to(ele, {
                     duration,
-                    fillOpacity: 1
+                    opacity: 1
                 });
             });
 
             // 特殊元素的处理
             gsap.to("#GaussianBlurring", {
                 duration,
-                fillOpacity: 1
+                opacity: 1
             });
 
             // 移除高亮的叶片
             $(".soil-clone").remove()
+
+            // 隐藏年份描述，显示默认描述
+            gsap.to("#_2001-text", {
+                duration,
+                opacity: 0,
+            })
+            gsap.to("#default-text", {
+                duration,
+                opacity: 1,
+            })
         };
 
         // issue: 因为存在后一个svg分组覆盖前一个分组的情况，所以无法精确的使用svg元素触发(即花瓣触发)，临时改用文字，建议后期明确分组
 
         // 处理 2001 年
-        // 非 2001 相关数据透明度变化为 fillOpacity
+        // 非 2001 相关数据透明度变化为 opacity
         $("#_2001").mouseover(() => {
             greyOther("2001");
         });
-        // 鼠标离开 2001 后设置所有分组的 fillOpacity 为1
+        // 鼠标离开 2001 后设置所有分组的 opacity 为1
         $("#_2001").mouseleave(() => {
             showAll();
         });
 
         // 处理 2004 年
-        // 非 2004 相关数据透明度变化为 fillOpacity
+        // 非 2004 相关数据透明度变化为 opacity
         $("#_2004").mouseover(() => {
             greyOther("2004");
         });
-        // 鼠标离开 2004 后设置所有分组的 fillOpacity 为1
+        // 鼠标离开 2004 后设置所有分组的 opacity 为1
         $("#_2004").mouseleave(() => {
             showAll();
         });
 
         // 处理 2008 年
-        // 非 2008 相关数据透明度变化为 fillOpacity
+        // 非 2008 相关数据透明度变化为 opacity
         $("#_2008").mouseover(() => {
             greyOther("2008");
         });
-        // 鼠标离开 2008 后设置所有分组的 fillOpacity 为1
+        // 鼠标离开 2008 后设置所有分组的 opacity 为1
         $("#_2008").mouseleave(() => {
             showAll();
         });
 
         // 处理 2014 年
-        // 非 2014 相关数据透明度变化为 fillOpacity
+        // 非 2014 相关数据透明度变化为 opacity
         $("#_2014").mouseover(() => {
             greyOther("2014");
         });
-        // 鼠标离开 2014 后设置所有分组的 fillOpacity 为1
+        // 鼠标离开 2014 后设置所有分组的 opacity 为1
         $("#_2014").mouseleave(() => {
             showAll();
         });
