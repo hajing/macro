@@ -70,9 +70,10 @@ const initMacro = () => {
                 // 大叶子小叶子
                 if (year === currentYear) {
                     if (triggerType === 'Soil') {
-                        if (id === `_${currentYear}-Plant-Stocks`) opacityValue = opacity
+                        if (id === `_${currentYear}-Plant-Stocks` || id === `_${currentYear}-Plant-Density`) opacityValue = opacity
                     } else {
-                        if (id === `_${currentYear}-Soil-Stocks`) opacityValue = opacity
+                        if (id === `_${currentYear}-Soil-Stocks` || id === `_${currentYear}-Soil-Density`) opacityValue = opacity
+
                     }
                 }
                 // 粉红花瓣的特殊处理，分组合理的话此步骤可省略
