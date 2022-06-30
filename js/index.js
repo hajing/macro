@@ -4,10 +4,22 @@ $(document).ready(() => {
         const targetYears = [];
         const handlerData = {
             target: {
-                2001: [],
-                2004: [],
-                2008: [],
-                2014: [],
+                2001: {
+                    highlight: [],
+                    normal: []
+                },
+                2004: {
+                    highlight: [],
+                    normal: []
+                },
+                2008: {
+                    highlight: [],
+                    normal: []
+                },
+                2014: {
+                    highlight: [],
+                    normal: []
+                },
             },
             nonTarget: [],
         };
@@ -32,47 +44,63 @@ $(document).ready(() => {
                     null :
                     nonTargetYears.find((ele) => id.includes(ele));
                 if (targetYear) {
-                    handlerData.target[targetYear].push(this);
+                    // handlerData.target[targetYear].push(this);
+                    if (id.includes(`For${targetYear}`)) {
+                        handlerData.target[targetYear].highlight.push(this);
+                    } else {
+                        handlerData.target[targetYear].normal.push(this);
+                    }
                 }
                 if (nonTargetYear) {
                     handlerData.nonTarget.push(this);
                 }
             }
         });
-        console.log(handlerData)
 
         // 设置其它分组透明度为 opacity
-        const greyOther = (currentYear) => {
-            // $("#Description").load("../assets/svg/03-For2001.svg");
-
+        const greyOther = (currentYear, triggerType) => {
             const {
                 target,
                 nonTarget
             } = handlerData;
 
             Object.keys(target).forEach((year) => {
-                if (year !== currentYear) {
-                    target[year].forEach((ele) => {
-                        const id = $(ele).attr("id");
-                        // 粉红花瓣的特殊处理，分组合理的话此步骤可省略
-                        const opacityValue = id.includes('Soil-Stocks-2') ? 0.9 : opacity
-                        gsap.to(ele, {
-                            duration,
-                            opacity: opacityValue
-                        });
+                target[year].normal.forEach((ele) => {
+                    const id = $(ele).attr("id");
+                    let opacityValue = year !== currentYear ? opacity : 1
+                    // 大叶子小叶子
+                    if (year === currentYear) {
+                        if (triggerType === 'Soil') {
+                            if (id === `_${currentYear}-Plant-Stocks`) opacityValue = opacity
+                        } else {
+                            if (id === `_${currentYear}-Soil-Stocks`) opacityValue = opacity
+                        }
+                    }
+                    // 粉红花瓣的特殊处理，分组合理的话此步骤可省略
+                    if (id.includes('Plant-Stocks')) opacityValue = 0.8
+                    gsap.to(ele, {
+                        duration,
+                        opacity: opacityValue
                     });
-                }
+                });
             });
 
             nonTarget.forEach((ele) => {
                 const id = $(ele).attr("id");
+                let opacityValue = opacity
                 // 粉红花瓣的特殊处理，分组合理的话此步骤可省略
-                const opacityValue = id.includes('Soil-Stocks-2') ? 0.9 : opacity
+                if (id.includes('Plant-Stocks')) opacityValue = 0.8
                 gsap.to(ele, {
                     duration,
                     opacity: opacityValue
                 });
             });
+
+            // 隐藏默认描述
+            gsap.to("#Description1", {
+                duration,
+                opacity: 0,
+            })
 
             // 特殊元素的处理
             gsap.to("#GaussianBlurring", {
@@ -80,47 +108,45 @@ $(document).ready(() => {
                 opacity: 0.9
             });
 
-            // 高亮当前叶片
-            $(`#_${currentYear}-Soil-Stocks`)
-                .clone(false)
-                .removeAttr("id")
-                .attr('class', "soil-clone")
-                .appendTo($("#_2020-Soil-Stocks-2"));
-            $(`#_${currentYear}-Soil-Density`)
-                .clone(false)
-                .removeAttr("id")
-                .attr('class', "soil-clone")
-                .appendTo($("#_2020-Soil-Stocks-2"));
-            gsap.to(".soil-clone", {
-                duration,
-                opacity: 1
-            });
-
-            // 显示当前年份信息，隐藏默认描述
-            gsap.to("#default-text", {
-                duration,
-                opacity: 0,
-            })
-            gsap.to(`#_${currentYear}-text`, {
+            // 高亮当前年份相关数据
+            const currentHighlight = target[currentYear].highlight.find(ele => $(ele).attr("id").includes(triggerType))
+            if (currentHighlight) gsap.to(currentHighlight, {
                 duration,
                 opacity: 1,
+                visibility: 'visible'
             })
         };
 
         // 设置全部分组透明度为1
         const showAll = () => {
+
             const {
                 target,
                 nonTarget
             } = handlerData;
 
             Object.keys(target).forEach((year) => {
-                target[year].forEach((ele) => {
+                const {
+                    highlight,
+                    normal
+                } = target[year]
+
+                highlight.forEach((ele) => {
+                    gsap.to(ele, {
+                        duration,
+                        opacity: 0,
+                        visibility: 'hidden'
+                    });
+                });
+
+                normal.forEach((ele) => {
                     gsap.to(ele, {
                         duration,
                         opacity: 1
                     });
                 });
+
+
             });
 
             nonTarget.forEach((ele) => {
@@ -136,59 +162,91 @@ $(document).ready(() => {
                 opacity: 1
             });
 
-            // 移除高亮的叶片
-            $(".soil-clone").remove()
-
-            // 隐藏年份描述，显示默认描述
-            gsap.to("#_2001-text", {
-                duration,
-                opacity: 0,
-            })
-            gsap.to("#default-text", {
+            // 显示默认描述
+            gsap.to("#Description1", {
                 duration,
                 opacity: 1,
             })
         };
 
-        // issue: 因为存在后一个svg分组覆盖前一个分组的情况，所以无法精确的使用svg元素触发(即花瓣触发)，临时改用文字，建议后期明确分组
 
         // 处理 2001 年
-        // 非 2001 相关数据透明度变化为 opacity
-        $("#_2001").mouseover(() => {
-            greyOther("2001");
+        $("#_2001-Soil-Stocks").mouseover(() => {
+            greyOther("2001", 'Soil');
         });
-        // 鼠标离开 2001 后设置所有分组的 opacity 为1
-        $("#_2001").mouseleave(() => {
+        $("#_2001-Soil-Density").mouseover(() => {
+            greyOther("2001", 'Soil');
+        });
+        $("#_2001-Plant-Stocks").mouseover(() => {
+            greyOther("2001", 'Plant');
+        });
+        $("#_2001-Plant-Density").mouseover(() => {
+            greyOther("2001", 'Plant');
+        });
+        $('#For2001-Soil').mousemove(() => {
+            showAll();
+        });
+        $('#For2001-Plant').mousemove(() => {
             showAll();
         });
 
         // 处理 2004 年
-        // 非 2004 相关数据透明度变化为 opacity
-        $("#_2004").mouseover(() => {
-            greyOther("2004");
+        $("#_2004-Soil-Stocks").mouseover(() => {
+            greyOther("2004", 'Soil');
         });
-        // 鼠标离开 2004 后设置所有分组的 opacity 为1
-        $("#_2004").mouseleave(() => {
+        $("#_2004-Soil-Density").mouseover(() => {
+            greyOther("2004", 'Soil');
+        });
+        $("#_2004-Plant-Stocks").mouseover(() => {
+            greyOther("2004", 'Plant');
+        });
+        $("#_2004-Plant-Density").mouseover(() => {
+            greyOther("2004", 'Plant');
+        });
+        $('#For2004-Soil').mousemove(() => {
+            showAll();
+        });
+        $('#For2004-Plant').mousemove(() => {
             showAll();
         });
 
         // 处理 2008 年
-        // 非 2008 相关数据透明度变化为 opacity
-        $("#_2008").mouseover(() => {
-            greyOther("2008");
+        $("#_2008-Soil-Stocks").mouseover(() => {
+            greyOther("2008", 'Soil');
         });
-        // 鼠标离开 2008 后设置所有分组的 opacity 为1
-        $("#_2008").mouseleave(() => {
+        $("#_2008-Soil-Density").mouseover(() => {
+            greyOther("2008", 'Soil');
+        });
+        $("#_2008-Plant-Stocks").mouseover(() => {
+            greyOther("2008", 'Plant');
+        });
+        $("#_2008-Plant-Density").mouseover(() => {
+            greyOther("2008", 'Plant');
+        });
+        $('#For2008-Soil').mousemove(() => {
+            showAll();
+        });
+        $('#For2008-Plant').mousemove(() => {
             showAll();
         });
 
         // 处理 2014 年
-        // 非 2014 相关数据透明度变化为 opacity
-        $("#_2014").mouseover(() => {
-            greyOther("2014");
+        $("#_2014-Soil-Stocks").mouseover(() => {
+            greyOther("2014", 'Soil');
         });
-        // 鼠标离开 2014 后设置所有分组的 opacity 为1
-        $("#_2014").mouseleave(() => {
+        $("#_2014-Soil-Density").mouseover(() => {
+            greyOther("2014", 'Soil');
+        });
+        $("#_2014-Plant-Stocks").mouseover(() => {
+            greyOther("2014", 'Plant');
+        });
+        $("#_2014-Plant-Density").mouseover(() => {
+            greyOther("2014", 'Plant');
+        });
+        $('#For2014-Soil').mousemove(() => {
+            showAll();
+        });
+        $('#For2014-Plant').mousemove(() => {
             showAll();
         });
     };

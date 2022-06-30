@@ -9,6 +9,7 @@
     background-color: #001429;
 }
 
-.soil-clone {
+.highlight-year {
     opacity: 0;
+    visibility: hidden;
 }
